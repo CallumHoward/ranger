@@ -122,7 +122,7 @@ class UI(  # pylint: disable=too-many-instance-attributes,too-many-public-method
 
         self.settings.signal_bind('setopt.mouse_enabled', _setup_mouse)
         self.settings.signal_bind('setopt.freeze_files', self.redraw_statusbar)
-        _setup_mouse(dict(value=self.settings.mouse_enabled))
+        _setup_mouse({"value": self.settings.mouse_enabled})
 
         if not self.is_set_up:
             self.is_set_up = True
@@ -156,7 +156,7 @@ class UI(  # pylint: disable=too-many-instance-attributes,too-many-public-method
         except curses.error:
             pass
         if self.settings.mouse_enabled:
-            _setup_mouse(dict(value=False))
+            _setup_mouse({"value": False})
         curses.endwin()
         self.is_on = False
 
@@ -381,11 +381,14 @@ class UI(  # pylint: disable=too-many-instance-attributes,too-many-public-method
             try:
                 fixed_cwd = cwd.encode('utf-8', 'surrogateescape'). \
                     decode('utf-8', 'replace')
-                escapes = [
-                    curses.tigetstr('tsl').decode('latin-1'),
-                    ESCAPE_ICON_TITLE
-                ]
-                bel = curses.tigetstr('fsl').decode('latin-1')
+                titlecap = curses.tigetstr('tsl')
+                escapes = (
+                    [titlecap.decode("latin-1")]
+                    if titlecap is not None
+                    else [] + [ESCAPE_ICON_TITLE]
+                )
+                belcap = curses.tigetstr('fsl')
+                bel = belcap.decode('latin-1') if belcap is not None else ""
                 fmt_tups = [(e, fixed_cwd, bel) for e in escapes]
             except UnicodeError:
                 pass
